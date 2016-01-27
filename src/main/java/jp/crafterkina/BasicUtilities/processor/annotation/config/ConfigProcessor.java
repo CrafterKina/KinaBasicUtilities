@@ -3,17 +3,15 @@
  * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package jp.crafterkina.BasicUtilities.config;
+package jp.crafterkina.BasicUtilities.processor.annotation.config;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.primitives.Primitives;
+import jp.crafterkina.BasicUtilities.processor.annotation.AnnotationHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -22,62 +20,8 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 public class ConfigProcessor{
-    private final ASMDataTable dataTable;
-    private Map<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>>> annotations;
-
-    public ConfigProcessor(ASMDataTable dataTable){
-        this.dataTable = dataTable;
-    }
-
-    public void start(){
-        detectAnnotations();
-        parseConfigs();
-    }
-
-    private void detectAnnotations(){
-        Map<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>>> parent = Maps.newHashMap();
-        for(ModContainer container : Loader.instance().getModList()){
-            SetMultimap<String,ASMDataTable.ASMData> annotations = dataTable.getAnnotationsFor(container);
-            if(annotations == null) continue;
-            SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>> child = HashMultimap.create();
-            for(Map.Entry<String,ASMDataTable.ASMData> entry : annotations.entries()){
-                Pair<? extends Class<? extends Annotation>,Pair<Annotation,Field>> pair = convertEntry(entry);
-                if(pair == null) continue;
-                child.put(pair.getKey(), pair.getValue());
-            }
-            parent.put(container, child);
-        }
-        annotations = parent;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Pair<? extends Class<? extends Annotation>,Pair<Annotation,Field>> convertEntry(Map.Entry<String,ASMDataTable.ASMData> orig){
-        ASMDataTable.ASMData data = orig.getValue();
-        if(data == null) return null;
-        Class<?> clazz;
-        try{
-            clazz = Class.forName(data.getClassName());
-        }catch(ClassNotFoundException e){
-            return null;
-        }
-        Field field;
-        try{
-            field = clazz.getDeclaredField(data.getObjectName());
-        }catch(NoSuchFieldException e){
-            return null;
-        }
-        Class<? extends Annotation> annotationClazz;
-        try{
-            annotationClazz = (Class<? extends Annotation>) Class.forName(data.getAnnotationName());
-        }catch(ClassNotFoundException e){
-            return null;
-        }
-        Annotation annotation = field.getAnnotation(annotationClazz);
-        return Pair.of(annotationClazz, Pair.of(annotation, field));
-    }
-
-    private void parseConfigs(){
-        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>>> entry : annotations.entrySet()){
+    public static void parseConfigs(){
+        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>>> entry : AnnotationHelper.instance.getAnnotations().entrySet()){
             if(entry.getValue().containsKey(Configurable.class)){
                 String name = entry.getKey().getCustomModProperties().get("config.name");
                 name = name == null ? entry.getKey().getModId() + ".cfg" : name;
@@ -96,7 +40,7 @@ public class ConfigProcessor{
         }
     }
 
-    private void insert(Configuration config, Configurable info, Field target) throws IllegalAccessException{
+    private static void insert(Configuration config, Configurable info, Field target) throws IllegalAccessException{
         Property property;
         String name = info.name().isEmpty() ? target.getName() : info.name();
         if(target.getType().isArray()){

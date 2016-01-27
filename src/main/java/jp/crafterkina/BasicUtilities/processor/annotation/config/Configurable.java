@@ -3,7 +3,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package jp.crafterkina.BasicUtilities.config;
+package jp.crafterkina.BasicUtilities.processor.annotation.config;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
