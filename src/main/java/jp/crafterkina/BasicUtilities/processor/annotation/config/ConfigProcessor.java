@@ -7,7 +7,7 @@ package jp.crafterkina.BasicUtilities.processor.annotation.config;
 
 import com.google.common.collect.SetMultimap;
 import com.google.common.primitives.Primitives;
-import jp.crafterkina.BasicUtilities.processor.annotation.AnnotationHelper;
+import jp.crafterkina.BasicUtilities.processor.annotation.ASMDataTableInterpreter;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Loader;
@@ -16,21 +16,22 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.Map;
 
 public class ConfigProcessor{
     public static void parseConfigs(){
-        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,Field>>> entry : AnnotationHelper.instance.getAnnotations().entrySet()){
+        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> entry : ASMDataTableInterpreter.instance.getAnnotatedFieldMap().entrySet()){
             if(entry.getValue().containsKey(Configurable.class)){
                 String name = entry.getKey().getCustomModProperties().get("config.name");
                 name = name == null ? entry.getKey().getModId() + ".cfg" : name;
                 name = name.matches(".+\\..+") ? name : name + ".cfg";
                 Configuration config = new Configuration(new File(Loader.instance().getConfigDir(), name));
                 config.load();
-                for(Pair<Annotation,Field> pair : entry.getValue().get(Configurable.class)){
+                for(Pair<Annotation,AnnotatedElement> pair : entry.getValue().get(Configurable.class)){
                     try{
-                        insert(config, (Configurable) pair.getLeft(), pair.getRight());
+                        insert(config, (Configurable) pair.getLeft(), (Field) pair.getRight());
                     }catch(IllegalAccessException e){
                         e.printStackTrace();
                     }
