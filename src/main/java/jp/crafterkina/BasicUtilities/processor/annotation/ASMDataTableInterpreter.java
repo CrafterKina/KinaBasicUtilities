@@ -92,7 +92,7 @@ public enum ASMDataTableInterpreter{
     }
 
     private Pair<String,Class<?>[]> interpretMethod(String namedesc){
-        if(!namedesc.matches(".+\\(.+\\).+")){
+        if(!namedesc.matches(".+\\(.*\\).+")){
             return null;
         }
         String name = namedesc.substring(0, namedesc.indexOf('('));
