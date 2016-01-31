@@ -7,6 +7,7 @@ package jp.crafterkina.BasicUtilities;
 
 import jp.crafterkina.BasicUtilities.processor.annotation.ASMDataTableInterpreter;
 import jp.crafterkina.BasicUtilities.processor.annotation.config.ConfigProcessor;
+import jp.crafterkina.BasicUtilities.processor.annotation.register.GameRegistrar;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -17,5 +18,6 @@ public class BasicUtilitiesCore{
     public void preInit(FMLPreInitializationEvent event){
         ASMDataTableInterpreter.instance.init(event);
         ConfigProcessor.parseConfigs();
+        GameRegistrar.start();
     }
 }
