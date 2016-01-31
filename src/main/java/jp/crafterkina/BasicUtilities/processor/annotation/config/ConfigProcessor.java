@@ -5,8 +5,11 @@
 
 package jp.crafterkina.BasicUtilities.processor.annotation.config;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
+import com.google.common.reflect.Reflection;
 import jp.crafterkina.BasicUtilities.processor.annotation.ASMDataTableInterpreter;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -14,22 +17,29 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.util.Map;
 
 public class ConfigProcessor{
     public static void parseConfigs(){
-        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> entry : ASMDataTableInterpreter.instance.getAnnotatedFieldMap().entrySet()){
-            if(entry.getValue().containsKey(Configurable.class)){
+        for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> entry : Sets.filter(ASMDataTableInterpreter.instance.getAnnotatedFieldMap().entrySet(), new Predicate<Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>>(){
+            @Override
+            public boolean apply(@Nullable Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> input){
+                return input != null && input.getValue() != null && input.getValue().keySet().contains(Configurable.class);
+            }
+        })){
                 String name = entry.getKey().getCustomModProperties().get("config.name");
                 name = name == null ? entry.getKey().getModId() + ".cfg" : name;
                 name = name.matches(".+\\..+") ? name : name + ".cfg";
                 Configuration config = new Configuration(new File(Loader.instance().getConfigDir(), name));
                 config.load();
                 for(Pair<Annotation,AnnotatedElement> pair : entry.getValue().get(Configurable.class)){
+                    Reflection.initialize(pair.getRight() instanceof Class ? new Class<?>[]{(Class<?>) pair.getRight()} : pair.getRight() instanceof Member ? new Class<?>[]{((Member) pair.getRight()).getDeclaringClass()} : new Class<?>[]{});
                     try{
                         insert(config, (Configurable) pair.getLeft(), (Field) pair.getRight());
                     }catch(IllegalAccessException e){
@@ -37,7 +47,6 @@ public class ConfigProcessor{
                     }
                 }
                 config.save();
-            }
         }
     }
 
