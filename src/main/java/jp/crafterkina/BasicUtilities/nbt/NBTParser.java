@@ -39,15 +39,16 @@ public class NBTParser{
                 if(!(ann instanceof Insert)) continue;
                 Insert insert = (Insert) ann;
                 List<String> list = Splitter.on(insert.separator()).splitToList(insert.value());
+                NBTTagCompound cache = compound;
                 int j = 0;
                 for(; j < (list.size() - 1); j++){
                     String s = list.get(j);
-                    if(!compound.hasKey(s, Constants.NBT.TAG_COMPOUND)){
-                        compound.setTag(s, new NBTTagCompound());
+                    if(!cache.hasKey(s, Constants.NBT.TAG_COMPOUND)){
+                        cache.setTag(s, new NBTTagCompound());
                     }
-                    compound = compound.getCompoundTag(s);
+                    cache = cache.getCompoundTag(s);
                 }
-                compound.setTag(list.get(j), (NBTBase) arg);
+                cache.setTag(list.get(j), (NBTBase) arg);
             }
         }
     }
