@@ -93,6 +93,25 @@ public class NBTParserTest{
     }
 
     /**
+     * Try to insert multiple tags with or without NBTParser. Assert that the with is the without.
+     */
+    @Test
+    public void testInsertMultiple() throws Exception{
+        NBTTagCompound parser = new NBTTagCompound();
+        NBTTagCompound correct = new NBTTagCompound();
+        {
+            Gist parsed = NBTParser.parse(parser, Gist.class);
+            parsed.setMultipleTags(new NBTTagCompound(), new NBTTagInt(-1));
+        }
+        {
+            correct.setTag("parent", new NBTTagCompound());
+            correct.getCompoundTag("parent").setTag("itemstack", new NBTTagCompound());
+            correct.setTag("integer", new NBTTagInt(-1));
+        }
+        assertThat(parser, is(correct));
+    }
+
+    /**
      * Try to get compound of itemstack from "parent/itemstack" with or without NBTParser. Assert that the with is the
      * without.
      */
@@ -260,5 +279,7 @@ public class NBTParserTest{
 
         @NBTParser.Return("")
         NBTTagCompound getBase();
+
+        void setMultipleTags(@NBTParser.Insert("parent/itemstack") NBTTagCompound compound, @NBTParser.Insert("integer") NBTTagInt tagInt);
     }
 }
