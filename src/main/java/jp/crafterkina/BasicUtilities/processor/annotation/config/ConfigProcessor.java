@@ -35,19 +35,19 @@ public class ConfigProcessor{
         })){
             Map<String,String> properties = entry.getKey().getCustomModProperties();
             String name = properties == null ? null : properties.get("config.name");
-                name = name == null ? entry.getKey().getModId() + ".cfg" : name;
-                name = name.matches(".+\\..+") ? name : name + ".cfg";
-                Configuration config = new Configuration(new File(Loader.instance().getConfigDir(), name));
-                config.load();
-                for(Pair<Annotation,AnnotatedElement> pair : entry.getValue().get(Configurable.class)){
-                    Reflection.initialize(pair.getRight() instanceof Class ? new Class<?>[]{(Class<?>) pair.getRight()} : pair.getRight() instanceof Member ? new Class<?>[]{((Member) pair.getRight()).getDeclaringClass()} : new Class<?>[]{});
-                    try{
-                        insert(config, (Configurable) pair.getLeft(), (Field) pair.getRight());
-                    }catch(IllegalAccessException e){
-                        e.printStackTrace();
-                    }
+            name = name == null ? entry.getKey().getModId() + ".cfg" : name;
+            name = name.matches(".+\\..+") ? name : name + ".cfg";
+            Configuration config = new Configuration(new File(Loader.instance().getConfigDir(), name));
+            config.load();
+            for(Pair<Annotation,AnnotatedElement> pair : entry.getValue().get(Configurable.class)){
+                Reflection.initialize(pair.getRight() instanceof Class ? new Class<?>[]{(Class<?>) pair.getRight()} : pair.getRight() instanceof Member ? new Class<?>[]{((Member) pair.getRight()).getDeclaringClass()} : new Class<?>[]{});
+                try{
+                    insert(config, (Configurable) pair.getLeft(), (Field) pair.getRight());
+                }catch(IllegalAccessException e){
+                    e.printStackTrace();
                 }
-                config.save();
+            }
+            config.save();
         }
     }
 
