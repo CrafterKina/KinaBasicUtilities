@@ -10,6 +10,7 @@ import jp.crafterkina.BasicUtilities.processor.annotation.config.ConfigProcessor
 import jp.crafterkina.BasicUtilities.processor.annotation.register.GameRegistrar;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,12 +18,17 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = "jp.crafterkina.BasicUtilities")
 public class BasicUtilitiesCore{
     public static final Logger logger = LogManager.getLogger("jp.crafterkina.BasicUtilities");
+
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event){
+    public void construction(FMLConstructionEvent event){
         logger.debug("Start Interpret DataTable");
-        ASMDataTableInterpreter.instance.init(event);
+        ASMDataTableInterpreter.instance.init(event.getASMHarvestedData());
         logger.debug("Start Config Parse");
         ConfigProcessor.parseConfigs();
+    }
+
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event){
         logger.debug("Start Game Register");
         GameRegistrar.start();
     }

@@ -9,7 +9,6 @@ import com.google.common.collect.*;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.Type;
@@ -29,8 +28,8 @@ public enum ASMDataTableInterpreter{
     private ASMDataTable dataTable;
     private Table<Class<? extends AnnotatedElement>,ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> annotations = HashBasedTable.create();
 
-    public void init(FMLPreInitializationEvent event){
-        dataTable = event.getAsmData();
+    public void init(ASMDataTable table){
+        dataTable = table;
         interpretDataTable();
     }
 
