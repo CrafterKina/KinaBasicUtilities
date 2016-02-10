@@ -56,36 +56,44 @@ public class ConfigProcessor{
         if(target.getType().isArray()){
             if(Primitives.unwrap(target.getType().getComponentType()) == int.class){
                 property = config.get(info.category(), name, (int[]) target.get(null), info.comment());
+                if(property != null)
                 target.set(null, property.getIntList());
                 return;
             }else if(Primitives.unwrap(target.getType().getComponentType()) == boolean.class){
                 property = config.get(info.category(), name, (boolean[]) target.get(null), info.comment());
+                if(property != null)
                 target.set(null, property.getBooleanList());
                 return;
             }else if(Primitives.unwrap(target.getType().getComponentType()) == double.class){
                 property = config.get(info.category(), name, (double[]) target.get(null), info.comment());
+                if(property != null)
                 target.set(null, property.getDoubleList());
                 return;
             }else if(target.getType().getComponentType() == String.class){
                 property = config.get(info.category(), name, (String[]) target.get(null), info.comment());
+                if(property != null)
                 target.set(null, property.getStringList());
                 return;
             }
         }else{
             if(Primitives.unwrap(target.getType()) == int.class){
                 property = config.get(info.category(), name, (Integer) target.get(null), info.comment());
+                if(property != null)
                 target.setInt(null, property.getInt());
                 return;
             }else if(Primitives.unwrap(target.getType()) == boolean.class){
                 property = config.get(info.category(), name, (Boolean) target.get(null), info.comment());
+                if(property != null)
                 target.setBoolean(null, property.getBoolean());
                 return;
             }else if(Primitives.unwrap(target.getType()) == double.class){
                 property = config.get(info.category(), name, (Double) target.get(null), info.comment());
+                if(property != null)
                 target.setDouble(null, property.getDouble());
                 return;
             }else if(target.getType() == String.class){
                 property = config.get(info.category(), name, (String) target.get(null), info.comment());
+                if(property != null)
                 target.set(null, property.getString());
                 return;
             }
