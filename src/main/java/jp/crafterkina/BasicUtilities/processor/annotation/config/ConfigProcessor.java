@@ -33,7 +33,8 @@ public class ConfigProcessor{
                 return input != null && input.getValue() != null && input.getValue().keySet().contains(Configurable.class);
             }
         })){
-                String name = entry.getKey().getCustomModProperties().get("config.name");
+            Map<String,String> properties = entry.getKey().getCustomModProperties();
+            String name = properties == null ? null : properties.get("config.name");
                 name = name == null ? entry.getKey().getModId() + ".cfg" : name;
                 name = name.matches(".+\\..+") ? name : name + ".cfg";
                 Configuration config = new Configuration(new File(Loader.instance().getConfigDir(), name));
