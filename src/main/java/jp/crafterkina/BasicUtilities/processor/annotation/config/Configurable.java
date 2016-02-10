@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
 
-@Target({PARAMETER, FIELD})
+@Target({FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Configurable{
     String category() default "general";
