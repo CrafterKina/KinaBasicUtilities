@@ -5,8 +5,6 @@
 
 package jp.crafterkina.BasicUtilities.processor.annotation;
 
-import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.*;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
@@ -40,18 +38,22 @@ public enum ASMDataTableInterpreter{
     private void interpretDataTable(){
         for(ModContainer container : Loader.instance().getModList()){
             SetMultimap<String,ASMDataTable.ASMData> orig = getDataTable().getAnnotationsFor(container);
-            Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> converted = new Supplier<Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>>(){
+            Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> converted = new ForwardingMap<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>(){
+                Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> map = Maps.newHashMap();
                 @Override
-                public Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> get(){
-                    return Maps.transformValues(Maps.<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>newHashMap(), new Function<SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>(){
-                        @Nullable
-                        @Override
-                        public SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>> apply(@Nullable SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>> input){
-                            return input == null ? HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create() : input;
-                        }
-                    });
+                protected Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> delegate(){
+                    return map;
                 }
-            }.get();
+
+                @Override
+                public SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>> get(@Nullable Object key){
+                    if(key == null) return null;
+                    if(!super.containsKey(key)){
+                        super.put((Class<? extends AnnotatedElement>) key, HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create());
+                    }
+                    return super.get(key);
+                }
+            };
             if(orig == null) continue;
             for(ASMDataTable.ASMData data : orig.values()){
                 if(data == null) continue;
