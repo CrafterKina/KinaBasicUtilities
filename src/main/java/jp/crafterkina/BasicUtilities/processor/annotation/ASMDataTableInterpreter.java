@@ -64,7 +64,7 @@ public enum ASMDataTableInterpreter{
                     clazz = ClassUtils.getClass(data.getClassName(), false);
                     annotationClass = (Class<? extends Annotation>) ClassUtils.getClass(data.getAnnotationName(), false);
                 }catch(ClassNotFoundException e){
-                    throw new RuntimeException(e);
+                    continue;
                 }
                 try{
                     element = clazz.getDeclaredField(data.getObjectName());
