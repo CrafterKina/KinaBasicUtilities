@@ -77,7 +77,7 @@ public class NBTParser{
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Return{
+    public @interface Return{
         String value();
 
         String separator() default "/";
@@ -85,7 +85,7 @@ public class NBTParser{
 
     @Target(ElementType.PARAMETER)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Insert{
+    public @interface Insert{
         String value();
 
         String separator() default "/";
