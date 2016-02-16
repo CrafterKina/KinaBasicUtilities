@@ -5,15 +5,24 @@
 
 package jp.crafterkina.BasicUtilities.processor.annotation;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -54,22 +63,40 @@ public enum ASMDataTableInterpreter{
                 }
             };
             if(orig == null) continue;
-            for(ASMDataTable.ASMData data : orig.values()){
+            for(final ASMDataTable.ASMData data : orig.values()){
                 if(data == null) continue;
                 Class<?> clazz;
                 Class<? extends Annotation> annotationClass;
                 Annotation annotation;
                 AnnotatedElement element;
+                ClassReader reader;
                 try{
+                    reader = new ClassReader(data.getClassName());
+                }catch(IOException e){
+                    continue;
+                }
+                ClassNode node = new ClassNode();
+                reader.accept(node, 0);
+                try{
+                    if(!isValid(node.visibleAnnotations, FMLLaunchHandler.side().name())){
+                        continue;
+                    }
                     clazz = ClassUtils.getClass(data.getClassName(), false);
                     annotationClass = (Class<? extends Annotation>) ClassUtils.getClass(data.getAnnotationName(), false);
                 }catch(ClassNotFoundException e){
                     continue;
                 }
                 try{
-                    element = clazz.getDeclaredField(data.getObjectName());
-                    annotation = element.getAnnotation(annotationClass);
-                    converted.get(Field.class).put(annotationClass, Pair.of(annotation, element));
+                    if(!Collections2.filter(node.fields, new Predicate<FieldNode>(){
+                        @Override
+                        public boolean apply(@Nullable FieldNode input){
+                            return input != null && input.name.equals(data.getObjectName()) && isValid(input.visibleAnnotations, FMLLaunchHandler.side().name());
+                        }
+                    }).isEmpty()){
+                        element = clazz.getDeclaredField(data.getObjectName());
+                        annotation = element.getAnnotation(annotationClass);
+                        converted.get(Field.class).put(annotationClass, Pair.of(annotation, element));
+                    }
                 }catch(NoSuchFieldException ignored){
                 }
                 try{
@@ -80,10 +107,18 @@ public enum ASMDataTableInterpreter{
                 }
                 try{
                     Pair<String,Class<?>[]> pair = interpretMethod(data.getObjectName());
-                    if(pair != null){
-                        element = clazz.getMethod(pair.getLeft(), pair.getRight());
-                        annotation = element.getAnnotation(annotationClass);
-                        converted.get(Method.class).put(annotationClass, Pair.of(annotation, element));
+                    if(!Collections2.filter(node.methods, new Predicate<MethodNode>(){
+                        @Override
+                        public boolean apply(@Nullable MethodNode input){
+                            return input != null && (input.name + input.desc).equals(data.getObjectName()) && isValid(input.visibleAnnotations, FMLLaunchHandler.side().name());
+                        }
+                    }).isEmpty()){
+                        if(pair != null){
+                            element = clazz.getMethod(pair.getLeft(), pair.getRight());
+                            annotation = element.getAnnotation(annotationClass);
+                            converted.get(Method.class).put(annotationClass, Pair.of(annotation, element));
+                            break;
+                        }
                     }
                 }catch(NoSuchMethodException ignored){
                 }
@@ -108,6 +143,30 @@ public enum ASMDataTableInterpreter{
             }
         }
         return Pair.of(name, argClasses.toArray(new Class<?>[args.length]));
+    }
+
+    private boolean isValid(List<AnnotationNode> anns, String side){
+        if(anns == null){
+            return false;
+        }
+        for(AnnotationNode ann : anns){
+            if(ann.desc.equals(Type.getDescriptor(SideOnly.class))){
+                if(ann.values != null){
+                    for(int x = 0; x < ann.values.size() - 1; x += 2){
+                        Object key = ann.values.get(x);
+                        Object value = ann.values.get(x + 1);
+                        if(key instanceof String && "value".equals(key)){
+                            if(value instanceof String[]){
+                                if(!((String[]) value)[1].equals(side)){
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public ASMDataTable getDataTable(){
