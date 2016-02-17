@@ -202,17 +202,30 @@ public class NBTParserTest{
     }
 
     /**
-     * Try to get not exist tag with NBTParser. Assert that the with is null value.
+     * Try to get not exist tag with NBTParser. Assert that throws IllegalArgumentException.
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testReturnEmpty() throws Exception{
         NBTTagCompound target = new NBTTagCompound();
-        NBTTagInt parser;
         {
             Gist parsed = NBTParser.parse(target, Gist.class);
-            parser = parsed.getChildInteger();
+            parsed.getChildInteger();
         }
-        assertThat(parser, is(nullValue()));
+    }
+
+    /**
+     * Try to get not exist tag what has null parent. Assert that throws IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testReturnChildThroughNullTag() throws Exception{
+        NBTTagCompound target = new NBTTagCompound();
+        {
+            target.setTag("parent", null);
+        }
+        {
+            Gist parsed = NBTParser.parse(target, Gist.class);
+            parsed.getChildInteger();
+        }
     }
 
     /**

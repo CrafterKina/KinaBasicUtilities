@@ -62,8 +62,8 @@ public class NBTParser{
         for(ListIterator<String> iterator = Splitter.on(ann.separator()).splitToList(ann.value()).listIterator(); iterator.hasNext(); ){
             String next = iterator.next();
             if(cache instanceof NBTTagCompound){
-                if(((NBTTagCompound) cache).getTag(next) == null){
-                    ((NBTTagCompound) cache).setTag(next, cache = iterator.hasNext() ? new NBTTagCompound() : null);
+                if(!((NBTTagCompound) cache).hasKey(next) && iterator.hasNext()){
+                    throw new IllegalArgumentException("Nonexistent tag");
                 }else{
                     cache = ((NBTTagCompound) cache).getTag(next);
                 }
