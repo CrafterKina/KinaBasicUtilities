@@ -10,6 +10,7 @@ import jp.crafterkina.BasicUtilities.processor.annotation.ASMDataTableInterprete
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -19,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -54,37 +56,59 @@ public class GameRegistrar{
 
     private static void item(ModContainer container, Registrant.Item annotation, Class<? extends Item> item){
         try{
-            add.invoke(GameData.getItemRegistry(), -1, new ResourceLocation(container.getModId(), annotation.name()), item.getDeclaredConstructor().newInstance());
+            Constructor<? extends Item> constructor = item.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            registerItem(new ResourceLocation(container.getModId(), annotation.name()), constructor.newInstance());
+        }catch(InstantiationException e){
+            e.printStackTrace();
         }catch(IllegalAccessException e){
             e.printStackTrace();
         }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }catch(InstantiationException e){
             e.printStackTrace();
         }catch(NoSuchMethodException e){
             e.printStackTrace();
         }
     }
 
-    private static void block(ModContainer container, Registrant.Block annotation, Class<? extends Block> block){
+    public static void registerItem(ResourceLocation name, Item item){
         try{
-            Block instance = block.getConstructor().newInstance();
-            add.invoke(GameData.getBlockRegistry(), -1, new ResourceLocation(container.getModId(), annotation.name()), instance);
-            if(annotation.hasItem()){
-                Item item = annotation.itemblock().getDeclaredConstructor().newInstance();
-                add.invoke(GameData.getItemRegistry(), -1, new ResourceLocation(container.getModId(), annotation.name()), item);
-                GameData.getBlockItemMap().put(instance, item);
-            }
-
+            add.invoke(GameData.getItemRegistry(), -1, name, item);
         }catch(IllegalAccessException e){
             e.printStackTrace();
         }catch(InvocationTargetException e){
             e.printStackTrace();
-        }catch(InstantiationException e){
-            e.printStackTrace();
+        }
+    }
+
+    private static void block(ModContainer container, Registrant.Block annotation, Class<? extends Block> block){
+        try{
+            Constructor<? extends Block> constructor = block.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            registerBlock(new ResourceLocation(container.getModId(), annotation.name()), constructor.newInstance());
         }catch(NoSuchMethodException e){
             e.printStackTrace();
+        }catch(IllegalAccessException e){
+            e.printStackTrace();
+        }catch(InstantiationException e){
+            e.printStackTrace();
+        }catch(InvocationTargetException e){
+            e.printStackTrace();
         }
+    }
+
+    public static void registerBlock(ResourceLocation name, Block block){
+        try{
+            add.invoke(GameData.getBlockRegistry(), -1, name, block);
+        }catch(IllegalAccessException e){
+            e.printStackTrace();
+        }catch(InvocationTargetException e){
+            e.printStackTrace();
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public static void mapItemBlock(ItemBlock item){
+        GameData.getBlockItemMap().put(item.getBlock(), item);
     }
 
     private static void entity(ModContainer container, Registrant.Entity annotation, Class<? extends Entity> entity, int id){
