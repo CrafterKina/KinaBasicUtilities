@@ -237,6 +237,7 @@ public class ModelItem implements IFlexibleBakedModel, ISmartItemModel, IPerspec
 
     @Override
     public IBakedModel handleItemState(ItemStack stack){
+        stack.getItem().updateItemStackNBT(stack.getTagCompound());
         TextureContainer container = NBTParser.parse(stack.getTagCompound(), TextureContainer.class);
         List<ResourceLocation> locations = Lists.newArrayList();
         for(int i = 0; i < container.getTextures().tagCount(); i++){
