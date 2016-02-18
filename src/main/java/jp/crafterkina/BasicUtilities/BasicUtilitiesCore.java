@@ -41,7 +41,7 @@ public class BasicUtilitiesCore{
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void receiveIMC(FMLInterModComms.IMCEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
@@ -56,32 +56,32 @@ public class BasicUtilitiesCore{
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void toStartServer(FMLServerAboutToStartEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void startingServer(FMLServerStartingEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void startedServer(FMLServerStartedEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void stoppingServer(FMLServerStoppingEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void stoppedServer(FMLServerStoppedEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
 
-    @Mod.EventHandler
+    @EventHandler
     private void disabled(FMLModDisabledEvent event){
         ClassInitializer.INSTANCE.run(event);
     }
