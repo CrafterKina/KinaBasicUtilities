@@ -5,9 +5,11 @@
 
 package jp.crafterkina.BasicUtilities.client;
 
+import jp.crafterkina.BasicUtilities.BasicUtilitiesCore;
 import jp.crafterkina.BasicUtilities.client.models.ModelCross;
 import jp.crafterkina.BasicUtilities.client.models.ModelCube;
 import jp.crafterkina.BasicUtilities.client.models.ModelItem;
+import jp.crafterkina.BasicUtilities.processor.annotation.init.Initialize;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -22,10 +24,16 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@Initialize(side = "CLIENT")
 public enum BasicModelLoader{
     INSTANCE;
 
-    public static void mapModel(final Model model, Item item){
+    static{
+        BasicUtilitiesCore.logger.debug("Start ModelLoader Initialize");
+        INSTANCE.init();
+    }
+
+    public void mapModel(final Model model, Item item){
         ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition(){
             @Override
             public ModelResourceLocation getModelLocation(ItemStack stack){
@@ -34,7 +42,7 @@ public enum BasicModelLoader{
         });
     }
 
-    public static void mapModel(final Model model, Block block){
+    public void mapModel(final Model model, Block block){
         ModelLoader.setCustomMeshDefinition(Item.getItemFromBlock(block), new ItemMeshDefinition(){
             @Override
             public ModelResourceLocation getModelLocation(ItemStack stack){

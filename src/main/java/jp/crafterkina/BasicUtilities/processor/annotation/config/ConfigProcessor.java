@@ -10,11 +10,14 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
 import com.google.common.reflect.Reflection;
+import jp.crafterkina.BasicUtilities.BasicUtilitiesCore;
 import jp.crafterkina.BasicUtilities.processor.annotation.ASMDataTableInterpreter;
+import jp.crafterkina.BasicUtilities.processor.annotation.init.Initialize;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -25,8 +28,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.Map;
 
-public class ConfigProcessor{
-    public static void parseConfigs(){
+@Initialize(FMLConstructionEvent.class)
+public enum ConfigProcessor{
+    INSTANCE;
+
+    static{
+        BasicUtilitiesCore.logger.debug("Start Config Parse");
+        INSTANCE.parseConfigs();
+    }
+
+    public void parseConfigs(){
         for(Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> entry : Sets.filter(ASMDataTableInterpreter.instance.getAnnotatedFieldMap().entrySet(), new Predicate<Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>>(){
             @Override
             public boolean apply(@Nullable Map.Entry<ModContainer,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> input){
@@ -51,7 +62,7 @@ public class ConfigProcessor{
         }
     }
 
-    private static void insert(Configuration config, Configurable info, Field target) throws IllegalAccessException{
+    private void insert(Configuration config, Configurable info, Field target) throws IllegalAccessException{
         Property property;
         String name = info.name().isEmpty() ? target.getName() : info.name();
         if(target.getType().isArray()){

@@ -17,7 +17,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.ListIterator;
 
-public class NBTParser{
+public enum NBTParser{
+    ;
 
     public static <T> T parse(final NBTTagCompound compound, Class<? extends T> clazz){
         return Reflection.newProxy(clazz, new InvocationHandler(){

@@ -46,22 +46,10 @@ public enum ASMDataTableInterpreter{
     private void interpretDataTable(){
         for(ModContainer container : Loader.instance().getModList()){
             SetMultimap<String,ASMDataTable.ASMData> orig = getDataTable().getAnnotationsFor(container);
-            Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> converted = new ForwardingMap<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>>(){
-                Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> map = Maps.newHashMap();
-                @Override
-                protected Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> delegate(){
-                    return map;
-                }
-
-                @Override
-                public SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>> get(@Nullable Object key){
-                    if(key == null) return null;
-                    if(!super.containsKey(key)){
-                        super.put((Class<? extends AnnotatedElement>) key, HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create());
-                    }
-                    return super.get(key);
-                }
-            };
+            Map<Class<? extends AnnotatedElement>,SetMultimap<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>> converted = Maps.newHashMap();
+            converted.put(Class.class, HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create());
+            converted.put(Field.class, HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create());
+            converted.put(Method.class, HashMultimap.<Class<? extends Annotation>,Pair<Annotation,AnnotatedElement>>create());
             if(orig == null) continue;
             for(final ASMDataTable.ASMData data : orig.values()){
                 if(data == null) continue;
@@ -78,7 +66,7 @@ public enum ASMDataTableInterpreter{
                 ClassNode node = new ClassNode();
                 reader.accept(node, 0);
                 try{
-                    if(!isValid(node.visibleAnnotations, FMLLaunchHandler.side().name())){
+                    if(isInvalid(node.visibleAnnotations, FMLLaunchHandler.side().name())){
                         continue;
                     }
                     clazz = ClassUtils.getClass(data.getClassName(), false);
@@ -90,7 +78,7 @@ public enum ASMDataTableInterpreter{
                     if(!Collections2.filter(node.fields, new Predicate<FieldNode>(){
                         @Override
                         public boolean apply(@Nullable FieldNode input){
-                            return input != null && input.name.equals(data.getObjectName()) && isValid(input.visibleAnnotations, FMLLaunchHandler.side().name());
+                            return input != null && input.name.equals(data.getObjectName()) && !isInvalid(input.visibleAnnotations, FMLLaunchHandler.side().name());
                         }
                     }).isEmpty()){
                         element = clazz.getDeclaredField(data.getObjectName());
@@ -110,14 +98,13 @@ public enum ASMDataTableInterpreter{
                     if(!Collections2.filter(node.methods, new Predicate<MethodNode>(){
                         @Override
                         public boolean apply(@Nullable MethodNode input){
-                            return input != null && (input.name + input.desc).equals(data.getObjectName()) && isValid(input.visibleAnnotations, FMLLaunchHandler.side().name());
+                            return input != null && (input.name + input.desc).equals(data.getObjectName()) && !isInvalid(input.visibleAnnotations, FMLLaunchHandler.side().name());
                         }
                     }).isEmpty()){
                         if(pair != null){
                             element = clazz.getMethod(pair.getLeft(), pair.getRight());
                             annotation = element.getAnnotation(annotationClass);
                             converted.get(Method.class).put(annotationClass, Pair.of(annotation, element));
-                            break;
                         }
                     }
                 }catch(NoSuchMethodException ignored){
@@ -145,7 +132,7 @@ public enum ASMDataTableInterpreter{
         return Pair.of(name, argClasses.toArray(new Class<?>[args.length]));
     }
 
-    private boolean isValid(List<AnnotationNode> anns, String side){
+    private boolean isInvalid(List<AnnotationNode> anns, String side){
         if(anns == null){
             return false;
         }
