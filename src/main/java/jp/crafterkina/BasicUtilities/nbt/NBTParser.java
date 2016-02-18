@@ -6,11 +6,15 @@
 package jp.crafterkina.BasicUtilities.nbt;
 
 import com.google.common.base.Splitter;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.Reflection;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.annotation.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -22,10 +26,17 @@ public enum NBTParser{
 
     public static <T> T parse(final NBTTagCompound compound, Class<? extends T> clazz){
         return Reflection.newProxy(clazz, new InvocationHandler(){
+            LoadingCache<Return,NBTBase> cache = CacheBuilder.newBuilder().build(new CacheLoader<Return,NBTBase>(){
+                @Override
+                @ParametersAreNonnullByDefault
+                public NBTBase load(Return key) throws Exception{
+                    return returnNBT(compound, key);
+                }
+            });
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
                 if(compound == null) return null;
-                NBTBase result = returnNBT(compound, method.getAnnotation(Return.class));
+                NBTBase result = cache.get(method.getAnnotation(Return.class));
                 insertNBT(compound, method.getParameterAnnotations(), args);
                 return result;
             }
