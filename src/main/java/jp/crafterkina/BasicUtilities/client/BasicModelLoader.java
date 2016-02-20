@@ -15,6 +15,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -40,6 +41,7 @@ public enum BasicModelLoader{
                 return new ModelResourceLocation(new ResourceLocation("jp.crafterkina.basicutilities", "router"), model.name().toLowerCase());
             }
         });
+        ModelBakery.registerItemVariants(item, new ModelResourceLocation(new ResourceLocation("jp.crafterkina.basicutilities", "router"), model.name().toLowerCase()));
     }
 
     public void mapModel(final Model model, Block block){
@@ -55,6 +57,7 @@ public enum BasicModelLoader{
                 return new ModelResourceLocation(new ResourceLocation("jp.crafterkina.basicutilities", "router"), model.name().toLowerCase());
             }
         });
+        ModelBakery.registerItemVariants(Item.getItemFromBlock(block), new ModelResourceLocation(new ResourceLocation("jp.crafterkina.basicutilities", "router"), model.name().toLowerCase()));
     }
 
     public void init(){

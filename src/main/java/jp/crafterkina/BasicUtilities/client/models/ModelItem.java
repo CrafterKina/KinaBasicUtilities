@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.EnumFacing;
@@ -237,6 +238,7 @@ public class ModelItem implements IFlexibleBakedModel, ISmartItemModel, IPerspec
 
     @Override
     public IBakedModel handleItemState(ItemStack stack){
+        if(!stack.hasTagCompound()) stack.setTagCompound(new NBTTagCompound());
         stack.getItem().updateItemStackNBT(stack.getTagCompound());
         TextureContainer container = NBTParser.parse(stack.getTagCompound(), TextureContainer.class);
         List<ResourceLocation> locations = Lists.newArrayList();
