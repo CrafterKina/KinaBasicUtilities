@@ -36,7 +36,7 @@ public class ModelCube implements IFlexibleBakedModel, ISmartBlockModel, ISmartI
     private static final org.lwjgl.util.vector.Vector3f start = new org.lwjgl.util.vector.Vector3f(0, 0, 0);
     private static final org.lwjgl.util.vector.Vector3f end = new org.lwjgl.util.vector.Vector3f(16, 16, 16);
     private static final BlockFaceUV uv = new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0);
-    private static final Matrix4f tpv = TRSRTransformation.mul(new Vector3f(0.0F, 0.1F, -0.175F), TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)), new Vector3f(0.375F, 0.375F, 0.375F), null);
+    private static final Matrix4f tpv = TRSRTransformation.mul(new Vector3f(0, 1.5f / 16, -2.75f / 16), TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)), new Vector3f(0.375f, 0.375f, 0.375f), null);
     private final ListMultimap<EnumFacing,BakedQuad> quads;
     private final TextureAtlasSprite particle;
 

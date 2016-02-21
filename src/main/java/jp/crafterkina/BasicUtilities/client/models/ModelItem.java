@@ -33,9 +33,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class ModelItem implements IFlexibleBakedModel, ISmartItemModel, IPerspectiveAwareModel{
-    private static final Matrix4f normalTPV = TRSRTransformation.mul(new Vector3f(0, 1, -3), TRSRTransformation.quatFromYXZDegrees(new Vector3f(-90, 0, 0)), new Vector3f(0.55f, 0.55f, 0.55f), null);
-    private static final Matrix4f FPV = TRSRTransformation.mul(new Vector3f(0, 4, 2), TRSRTransformation.quatFromYXZDegrees(new Vector3f(0, -135, 25)), new Vector3f(1.7f, 1.7f, 1.7f), null);
-    private static final Matrix4f full3dTPV = TRSRTransformation.mul(new Vector3f(0, 1.25f, -3.5f), TRSRTransformation.quatFromYXZDegrees(new Vector3f(0, 90, -35)), new Vector3f(0.85f, 0.85f, 0.85f), null);
+    private static final Matrix4f normalTPV = TRSRTransformation.mul(new Vector3f(0, 1f / 16, -3f / 16), TRSRTransformation.quatFromYXZDegrees(new Vector3f(-90, 0, 0)), new Vector3f(0.55f, 0.55f, 0.55f), null);
+    private static final Matrix4f FPV = TRSRTransformation.mul(new Vector3f(0, 4f / 16, 2f / 16), TRSRTransformation.quatFromYXZDegrees(new Vector3f(0, -135, 25)), new Vector3f(1.7f, 1.7f, 1.7f), null);
+    private static final Matrix4f full3dTPV = TRSRTransformation.mul(new Vector3f(0, 1.25f / 16, -3.5f / 16), TRSRTransformation.quatFromYXZDegrees(new Vector3f(0, 90, -35)), new Vector3f(0.85f, 0.85f, 0.85f), null);
     private final TextureAtlasSprite particle;
     private final List<BakedQuad> quads = Lists.newArrayList();
     private final Matrix4f TPV;
