@@ -319,4 +319,20 @@ public class ModelItem implements IFlexibleBakedModel, ISmartItemModel, IPerspec
 
         void setParticle(@NBTParser.Insert("model/particle") NBTTagString location);
     }
+
+    public static abstract class TextureContainerWrapper{
+        protected abstract ResourceLocation getParticle(NBTTagCompound compound);
+
+        protected abstract ResourceLocation[] getTextures(NBTTagCompound compound);
+
+        public final void apply(NBTTagCompound compound){
+            TextureContainer parse = NBTParser.parse(compound, TextureContainer.class);
+            parse.setParticle(new NBTTagString(getParticle(compound).toString()));
+            NBTTagList textures = new NBTTagList();
+            for(ResourceLocation location : getTextures(compound)){
+                textures.appendTag(new NBTTagString(location.toString()));
+            }
+            parse.setTextures(textures);
+        }
+    }
 }
